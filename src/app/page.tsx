@@ -61,27 +61,47 @@ export default function Home() {
     try {
       console.log('Starting Farcaster authentication...');
       
-      // Use the proper Farcaster authentication flow
-      const { token } = await sdk.quickAuth.getToken();
-      console.log('Got Quick Auth token:', token ? 'Present' : 'Missing');
-      
-      if (token) {
-        // Decode the JWT to get user info (in a real app, you'd validate this on your server)
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        console.log('JWT payload:', payload);
-        
-        const fid = payload.sub;
-        const username = `user_${fid}`; // You could fetch the actual username from Neynar API
-        
-        await handleSignInSuccess({ fid, username });
-      } else {
-        console.error('No token received from Quick Auth');
-        setError('Failed to authenticate with Farcaster');
-      }
+      // This function is now just a placeholder since AuthKit handles the actual sign-in
+      // The real authentication happens in handleAuthKitSuccess
+      console.log('AuthKit SignInButton will handle the authentication');
     } catch (err) {
       console.error('Authentication error:', err);
       setError('Failed to sign in with Farcaster. Please try again.');
     }
+  };
+
+  // Handle AuthKit SignInButton success
+  const handleAuthKitSuccess = async (res: any) => {
+    console.log('AuthKit success:', res);
+    try {
+      // Get the real FID from Quick Auth
+      const { token } = await sdk.quickAuth.getToken();
+      console.log('Quick Auth token received:', token ? 'Present' : 'Missing');
+      
+      if (token) {
+        // Decode the JWT to get the real FID
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        console.log('JWT payload:', payload);
+        
+        const realFid = payload.sub;
+        console.log('Real FID from Quick Auth:', realFid);
+        
+        // Use the real FID to authenticate the user
+        await handleSignInSuccess({ fid: realFid, username: res.username || `user_${realFid}` });
+      } else {
+        console.error('No Quick Auth token received');
+        setError('Failed to authenticate with Farcaster');
+      }
+    } catch (err) {
+      console.error('Quick Auth error:', err);
+      setError('Failed to get authentication token');
+    }
+  };
+
+  // Handle AuthKit SignInButton error
+  const handleAuthKitError = (error: any) => {
+    console.error('AuthKit error:', error);
+    setError('Failed to sign in with Farcaster. Please try again.');
   };
 
   // Handle sign-out
@@ -197,8 +217,9 @@ export default function Home() {
     return (
       <CastlyticsLanding
         isSignedIn={false}
-        onSignIn={handleSignIn}
         onSignOut={handleSignOut}
+        onAuthKitSuccess={handleAuthKitSuccess}
+        onAuthKitError={handleAuthKitError}
       >
         <div className="text-center">
           <div className="inline-flex items-center justify-center w-16 h-16 mb-6">
@@ -216,8 +237,9 @@ export default function Home() {
     return (
       <CastlyticsLanding
         isSignedIn={false}
-        onSignIn={handleSignIn}
         onSignOut={handleSignOut}
+        onAuthKitSuccess={handleAuthKitSuccess}
+        onAuthKitError={handleAuthKitError}
       >
         <div className="max-w-md mx-auto text-center">
           <div className="bg-red-50 border border-red-200 rounded-lg p-6 mb-6">
@@ -241,8 +263,9 @@ export default function Home() {
     <CastlyticsLanding
       isSignedIn={!!user}
       username={user?.username}
-      onSignIn={handleSignIn}
       onSignOut={handleSignOut}
+      onAuthKitSuccess={handleAuthKitSuccess}
+      onAuthKitError={handleAuthKitError}
     >
       {!user ? (
         // Sign-in prompt
