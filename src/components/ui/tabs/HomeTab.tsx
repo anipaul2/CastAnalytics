@@ -19,6 +19,8 @@ interface Cast {
   timestamp: string;
   totalEngagement: number;
   rank: number;
+  hash: string;
+  embeds: any[];
 }
 
 /**

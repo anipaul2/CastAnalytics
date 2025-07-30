@@ -76,7 +76,7 @@ export default function CastlyticsLanding({
                 Know what resonates before you cast
               </h2>
               <p className="text-lg md:text-xl text-purple-100 max-w-4xl mx-auto leading-relaxed">
-                Discover which of your casts sparked the most engagement. Understand your audience's preferences, refine
+                Discover which of your casts sparked the most engagement. Understand your audience&apos;s preferences, refine
                 your content strategy, and craft casts that truly connect. Because great content starts with
                 understanding what works.
               </p>

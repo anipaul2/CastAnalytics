@@ -1,7 +1,6 @@
 "use client"
 
-import { Heart, MessageCircle, Repeat2, Crown, Medal, Trophy, ExternalLink } from "lucide-react"
-import sdk from "@farcaster/miniapp-sdk"
+import { Crown, Medal, Trophy } from "lucide-react";
 
 interface Cast {
   text: string
@@ -217,8 +216,8 @@ export default function TopEngagedCasts({ casts }: TopEngagedCastsProps) {
                 <div className="mb-6">
                   {/* Collect all images and videos first */}
                   {(() => {
-                    let allImages: any[] = [];
-                    let allVideos: any[] = [];
+                    const allImages: any[] = [];
+                    const allVideos: any[] = [];
                     
                     cast.embeds.forEach((embed: any, embedIndex: number) => {
                       console.log(`Processing embed ${embedIndex}:`, embed);
