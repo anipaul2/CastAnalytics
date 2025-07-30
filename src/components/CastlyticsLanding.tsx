@@ -4,14 +4,11 @@ import type React from "react"
 
 import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "~/components/ui/Button"
-import { SignInButton } from '@farcaster/auth-kit'
 
 interface CastlyticsLandingProps {
   isSignedIn: boolean
   username?: string
   onSignOut: () => void
-  onAuthKitSuccess: (res: any) => Promise<void>
-  onAuthKitError: (error: any) => void
   children: React.ReactNode
 }
 
@@ -19,8 +16,6 @@ export default function CastlyticsLanding({
   isSignedIn,
   username,
   onSignOut,
-  onAuthKitSuccess,
-  onAuthKitError,
   children,
 }: CastlyticsLandingProps) {
   const features = [
@@ -115,17 +110,18 @@ export default function CastlyticsLanding({
               ))}
             </motion.div>
 
-            {/* CTA Button */}
+            {/* Loading state for authentication */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8, duration: 0.6 }}
               className="text-center"
             >
-              <SignInButton
-                onSuccess={onAuthKitSuccess}
-                onError={onAuthKitError}
-              />
+              <div className="inline-flex items-center justify-center w-16 h-16 mb-6">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+              </div>
+              <h2 className="text-xl font-semibold text-white mb-2">Connecting to Farcaster...</h2>
+              <p className="text-purple-100">Getting your profile</p>
             </motion.div>
           </motion.div>
         ) : (

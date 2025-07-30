@@ -37,72 +37,49 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Call sdk.actions.ready() when the app is loaded
   useEffect(() => {
     sdk.actions.ready();
   }, []);
 
-  // Handle successful sign-in using proper Farcaster auth
-  const handleSignInSuccess = async ({ fid, username }: { fid: number; username: string }) => {
-    console.log('Authenticated with FID:', fid);
-    
-    const mockUser: User = {
-      fid,
-      username: username || `user_${fid}`,
-      displayName: username || `User ${fid}`,
-      pfpUrl: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=64&h=64&fit=crop&crop=face",
-    };
-    
-    setUser(mockUser);
-  };
-
-  // Handle sign-in using proper Farcaster authentication
-  const handleSignIn = async () => {
-    try {
-      console.log('Starting Farcaster authentication...');
-      
-      // This function is now just a placeholder since AuthKit handles the actual sign-in
-      // The real authentication happens in handleAuthKitSuccess
-      console.log('AuthKit SignInButton will handle the authentication');
-    } catch (err) {
-      console.error('Authentication error:', err);
-      setError('Failed to sign in with Farcaster. Please try again.');
-    }
-  };
-
-  // Handle AuthKit SignInButton success
-  const handleAuthKitSuccess = async (res: any) => {
-    console.log('AuthKit success:', res);
-    try {
-      // Get the real FID from Quick Auth
-      const { token } = await sdk.quickAuth.getToken();
-      console.log('Quick Auth token received:', token ? 'Present' : 'Missing');
-      
-      if (token) {
-        // Decode the JWT to get the real FID
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        console.log('JWT payload:', payload);
+  // Use Quick Auth directly as shown in the documentation
+  useEffect(() => {
+    const authenticateUser = async () => {
+      try {
+        console.log('Starting Quick Auth authentication...');
         
-        const realFid = payload.sub;
-        console.log('Real FID from Quick Auth:', realFid);
+        // Get the real FID from Quick Auth
+        const { token } = await sdk.quickAuth.getToken();
+        console.log('Quick Auth token received:', token ? 'Present' : 'Missing');
         
-        // Use the real FID to authenticate the user
-        await handleSignInSuccess({ fid: realFid, username: res.username || `user_${realFid}` });
-      } else {
-        console.error('No Quick Auth token received');
-        setError('Failed to authenticate with Farcaster');
+        if (token) {
+          // Decode the JWT to get the real FID
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          console.log('JWT payload:', payload);
+          
+          const realFid = payload.sub;
+          console.log('Real FID from Quick Auth:', realFid);
+          
+          // Create user object with real FID
+          const realUser: User = {
+            fid: realFid,
+            username: `user_${realFid}`,
+            displayName: `User ${realFid}`,
+            pfpUrl: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=64&h=64&fit=crop&crop=face",
+          };
+          
+          setUser(realUser);
+        } else {
+          console.error('No Quick Auth token received');
+          setError('Failed to authenticate with Farcaster');
+        }
+      } catch (err) {
+        console.error('Quick Auth error:', err);
+        setError('Failed to get authentication token');
       }
-    } catch (err) {
-      console.error('Quick Auth error:', err);
-      setError('Failed to get authentication token');
-    }
-  };
+    };
 
-  // Handle AuthKit SignInButton error
-  const handleAuthKitError = (error: any) => {
-    console.error('AuthKit error:', error);
-    setError('Failed to sign in with Farcaster. Please try again.');
-  };
+    authenticateUser();
+  }, []);
 
   // Handle sign-out
   const handleSignOut = () => {
@@ -218,8 +195,6 @@ export default function Home() {
       <CastlyticsLanding
         isSignedIn={false}
         onSignOut={handleSignOut}
-        onAuthKitSuccess={handleAuthKitSuccess}
-        onAuthKitError={handleAuthKitError}
       >
         <div className="text-center">
           <div className="inline-flex items-center justify-center w-16 h-16 mb-6">
@@ -238,8 +213,6 @@ export default function Home() {
       <CastlyticsLanding
         isSignedIn={false}
         onSignOut={handleSignOut}
-        onAuthKitSuccess={handleAuthKitSuccess}
-        onAuthKitError={handleAuthKitError}
       >
         <div className="max-w-md mx-auto text-center">
           <div className="bg-red-50 border border-red-200 rounded-lg p-6 mb-6">
@@ -264,13 +237,15 @@ export default function Home() {
       isSignedIn={!!user}
       username={user?.username}
       onSignOut={handleSignOut}
-      onAuthKitSuccess={handleAuthKitSuccess}
-      onAuthKitError={handleAuthKitError}
     >
       {!user ? (
-        // Sign-in prompt
+        // Loading authentication
         <div className="text-center">
-          {/* Removed SignInButton */}
+          <div className="inline-flex items-center justify-center w-16 h-16 mb-6">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+          </div>
+          <h2 className="text-xl font-semibold text-white mb-2">Connecting to Farcaster...</h2>
+          <p className="text-purple-100">Getting your profile</p>
         </div>
       ) : (
         // Show TopEngagedCasts component when user is signed in and casts are loaded
