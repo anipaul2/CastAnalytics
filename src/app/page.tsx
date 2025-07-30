@@ -36,49 +36,130 @@ export default function Home() {
   const [casts, setCasts] = useState<Cast[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isAuthenticating, setIsAuthenticating] = useState(true);
 
+  // Initialize SDK
   useEffect(() => {
-    sdk.actions.ready();
+    const initializeSDK = async () => {
+      try {
+        await sdk.actions.ready();
+        console.log('SDK initialized');
+      } catch (err) {
+        console.error('Failed to initialize SDK:', err);
+      }
+    };
+    initializeSDK();
   }, []);
 
-  // Use Quick Auth directly as shown in the documentation
+  // Handle authentication with proper error handling and retries
   useEffect(() => {
+    let isMounted = true;
+    let retryCount = 0;
+    const maxRetries = 3;
+
     const authenticateUser = async () => {
       try {
-        console.log('Starting Quick Auth authentication...');
+        console.log(`Authentication attempt ${retryCount + 1}/${maxRetries}`);
+        setIsAuthenticating(true);
         
-        // Get the real FID from Quick Auth
+        // Wait a bit for SDK to be fully ready
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Get the Quick Auth token
         const { token } = await sdk.quickAuth.getToken();
-        console.log('Quick Auth token received:', token ? 'Present' : 'Missing');
         
-        if (token) {
-          // Decode the JWT to get the real FID
-          const payload = JSON.parse(atob(token.split('.')[1]));
-          console.log('JWT payload:', payload);
-          
-          const realFid = payload.sub;
-          console.log('Real FID from Quick Auth:', realFid);
-          
-          // Create user object with real FID
-          const realUser: User = {
-            fid: realFid,
-            username: `user_${realFid}`,
-            displayName: `User ${realFid}`,
-            pfpUrl: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=64&h=64&fit=crop&crop=face",
-          };
-          
-          setUser(realUser);
-        } else {
-          console.error('No Quick Auth token received');
-          setError('Failed to authenticate with Farcaster');
+        if (!token) {
+          throw new Error('No authentication token received');
         }
+        
+        console.log('Quick Auth token received');
+        
+        // Decode the JWT to get user info
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const fid = parseInt(payload.sub);
+        
+        if (!fid || isNaN(fid)) {
+          throw new Error('Invalid FID in token');
+        }
+        
+        console.log('Extracted FID:', fid);
+        
+        // Fetch user profile from Neynar
+        try {
+          const userResponse = await fetch(
+            `https://api.neynar.com/v2/farcaster/user/bulk?fids=${fid}`,
+            {
+              headers: {
+                'accept': 'application/json',
+                'api_key': process.env.NEXT_PUBLIC_NEYNAR_API_KEY || '',
+              },
+            }
+          );
+
+          if (userResponse.ok) {
+            const userData = await userResponse.json();
+            const userInfo = userData.users?.[0];
+            
+            if (userInfo && isMounted) {
+              setUser({
+                fid: userInfo.fid,
+                username: userInfo.username,
+                displayName: userInfo.display_name,
+                pfpUrl: userInfo.pfp_url,
+              });
+              console.log('User profile loaded:', userInfo.username);
+            }
+          } else {
+            // Fallback user data if profile fetch fails
+            if (isMounted) {
+              setUser({
+                fid: fid,
+                username: `user_${fid}`,
+                displayName: `User ${fid}`,
+                pfpUrl: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=64&h=64&fit=crop&crop=face",
+              });
+            }
+          }
+        } catch (profileError) {
+          console.warn('Failed to fetch user profile, using fallback:', profileError);
+          // Use fallback user data
+          if (isMounted) {
+            setUser({
+              fid: fid,
+              username: `user_${fid}`,
+              displayName: `User ${fid}`,
+              pfpUrl: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=64&h=64&fit=crop&crop=face",
+            });
+          }
+        }
+        
+        setError(null);
       } catch (err) {
-        console.error('Quick Auth error:', err);
-        setError('Failed to get authentication token');
+        console.error('Authentication error:', err);
+        
+        if (retryCount < maxRetries - 1 && isMounted) {
+          retryCount++;
+          console.log(`Retrying authentication in 2 seconds...`);
+          setTimeout(() => {
+            if (isMounted) {
+              authenticateUser();
+            }
+          }, 2000);
+        } else if (isMounted) {
+          setError('Failed to authenticate. Please refresh and try again.');
+        }
+      } finally {
+        if (isMounted) {
+          setIsAuthenticating(false);
+        }
       }
     };
 
     authenticateUser();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   // Handle sign-out
@@ -86,14 +167,15 @@ export default function Home() {
     setUser(null);
     setCasts([]);
     setError(null);
+    // In a real app, you might want to clear the auth token here
   };
 
-  // Fetch user's casts when they sign in
+  // Fetch user's casts when authenticated
   useEffect(() => {
+    let isMounted = true;
+
     const fetchUserCasts = async () => {
-      if (!user?.fid) {
-        setCasts([]);
-        setError(null);
+      if (!user?.fid || isAuthenticating) {
         return;
       }
 
@@ -101,54 +183,44 @@ export default function Home() {
       setError(null);
 
       try {
-        console.log(`Fetching casts for FID: ${user.fid}`);
-        console.log(`API Key: ${process.env.NEXT_PUBLIC_NEYNAR_API_KEY ? 'Present' : 'Missing'}`);
+        console.log(`Fetching casts for user @${user.username} (FID: ${user.fid})`);
         
-        // Direct API call to Neynar with proper headers
+        // Fetch user's casts from Neynar
         const response = await fetch(
           `https://api.neynar.com/v2/farcaster/feed?feed_type=filter&filter_type=fids&fids=${user.fid}&limit=50`,
           {
             headers: {
               'accept': 'application/json',
               'api_key': process.env.NEXT_PUBLIC_NEYNAR_API_KEY || '',
-              'x-neynar-experimental': 'true', // Use filtered data to match Warpcast
+              'x-neynar-experimental': 'true',
             },
           }
         );
 
-        console.log(`Response status: ${response.status}`);
-        console.log(`Response headers:`, Object.fromEntries(response.headers.entries()));
-
         if (!response.ok) {
           const errorText = await response.text();
-          console.error('API Error response:', errorText);
-          throw new Error(`Failed to fetch casts: ${response.statusText} (${response.status}) - ${errorText}`);
+          throw new Error(`Failed to fetch casts: ${response.status} - ${errorText}`);
         }
 
         const data = await response.json();
-        console.log("Raw API Response:", JSON.stringify(data, null, 2));
+        console.log(`Fetched ${data.casts?.length || 0} casts`);
         
-        // Transform the casts to match our component interface
+        if (!data.casts || data.casts.length === 0) {
+          if (isMounted) {
+            setCasts([]);
+          }
+          return;
+        }
+
+        // Transform and sort casts by engagement
         const transformedCasts = data.casts
-          .filter((cast: any) => cast.text) // Only include casts with text
+          .filter((cast: any) => cast.text && cast.text.trim().length > 0)
           .map((cast: any) => {
-            console.log('Full cast object:', JSON.stringify(cast, null, 2));
-            
-            // Check multiple possible paths for reactions data
             const reactions = cast.reactions || {};
             const likes = reactions.likes_count || 0;
             const recasts = reactions.recasts_count || 0;
             const replies = cast.replies?.count || 0;
             const totalEngagement = likes + recasts + replies;
-            
-            console.log(`Cast engagement breakdown:`);
-            console.log(`- cast.reactions.likes_count: ${reactions.likes_count || 0}`);
-            console.log(`- cast.reactions.recasts_count: ${reactions.recasts_count || 0}`);
-            console.log(`- cast.replies.count: ${cast.replies?.count || 0}`);
-            console.log(`Final engagement - likes: ${likes}, recasts: ${recasts}, replies: ${replies}, total: ${totalEngagement}`);
-            
-            // Check for embeds/images
-            console.log(`Cast embeds:`, cast.embeds);
             
             return {
               text: cast.text,
@@ -164,8 +236,8 @@ export default function Home() {
               },
               timestamp: cast.timestamp,
               totalEngagement,
-              hash: cast.hash, // Add cast hash for Warpcast link
-              embeds: cast.embeds || [], // Add embeds for images
+              hash: cast.hash,
+              embeds: cast.embeds || [],
             };
           })
           .sort((a: Cast, b: Cast) => b.totalEngagement - a.totalEngagement)
@@ -175,25 +247,80 @@ export default function Home() {
             rank: index + 1,
           }));
 
-        console.log("Transformed casts:", transformedCasts);
-        setCasts(transformedCasts);
+        console.log(`Showing top ${transformedCasts.length} casts by engagement`);
+        
+        if (isMounted) {
+          setCasts(transformedCasts);
+        }
       } catch (err) {
         console.error("Error fetching casts:", err);
-        setError(err instanceof Error ? err.message : "Failed to fetch casts");
-        setCasts([]);
+        if (isMounted) {
+          setError(err instanceof Error ? err.message : "Failed to fetch casts");
+          setCasts([]);
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchUserCasts();
-  }, [user?.fid]);
 
-  // Show loading state
-  if (loading) {
+    return () => {
+      isMounted = false;
+    };
+  }, [user?.fid, isAuthenticating]);
+
+  // Show authentication loading state
+  if (isAuthenticating) {
     return (
       <CastlyticsLanding
         isSignedIn={false}
+        onSignOut={handleSignOut}
+      >
+        <div className="text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 mb-6">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+          </div>
+          <h2 className="text-xl font-semibold text-white mb-2">Connecting to Farcaster...</h2>
+          <p className="text-purple-100">Authenticating your account</p>
+        </div>
+      </CastlyticsLanding>
+    );
+  }
+
+  // Show error state
+  if (error && !loading) {
+    return (
+      <CastlyticsLanding
+        isSignedIn={!!user}
+        username={user?.username}
+        onSignOut={handleSignOut}
+      >
+        <div className="max-w-md mx-auto text-center">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6 mb-6">
+            <div className="text-red-600 text-4xl mb-4">⚠️</div>
+            <h2 className="text-lg font-semibold text-red-800 mb-2">Something went wrong</h2>
+            <p className="text-red-600 text-sm">{error}</p>
+          </div>
+          <button 
+            onClick={() => window.location.reload()}
+            className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+          >
+            Reload App
+          </button>
+        </div>
+      </CastlyticsLanding>
+    );
+  }
+
+  // Show loading state while fetching casts
+  if (loading) {
+    return (
+      <CastlyticsLanding
+        isSignedIn={true}
+        username={user?.username}
         onSignOut={handleSignOut}
       >
         <div className="text-center">
@@ -207,50 +334,14 @@ export default function Home() {
     );
   }
 
-  // Show error state
-  if (error) {
-    return (
-      <CastlyticsLanding
-        isSignedIn={false}
-        onSignOut={handleSignOut}
-      >
-        <div className="max-w-md mx-auto text-center">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-6 mb-6">
-            <div className="text-red-600 text-4xl mb-4">⚠️</div>
-            <h2 className="text-lg font-semibold text-red-800 mb-2">Oops! Something went wrong</h2>
-            <p className="text-red-600 text-sm">{error}</p>
-          </div>
-          <button 
-            onClick={() => setError(null)}
-            className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
-          >
-            Try Again
-          </button>
-        </div>
-      </CastlyticsLanding>
-    );
-  }
-
-  // Use CastlyticsLanding component to wrap everything
+  // Main app UI
   return (
     <CastlyticsLanding
       isSignedIn={!!user}
       username={user?.username}
       onSignOut={handleSignOut}
     >
-      {!user ? (
-        // Loading authentication
-        <div className="text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 mb-6">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
-          </div>
-          <h2 className="text-xl font-semibold text-white mb-2">Connecting to Farcaster...</h2>
-          <p className="text-purple-100">Getting your profile</p>
-        </div>
-      ) : (
-        // Show TopEngagedCasts component when user is signed in and casts are loaded
-        <TopEngagedCasts casts={casts} />
-      )}
+      <TopEngagedCasts casts={casts} />
     </CastlyticsLanding>
   );
 }

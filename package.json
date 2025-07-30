@@ -17,6 +17,7 @@
     "build:raw": "next build",
     "start": "next start",
     "lint": "next lint",
+    "setup": "node scripts/setup-env.js",
     "deploy:vercel": "node --loader ts-node/esm scripts/deploy.ts",
     "deploy:raw": "vercel --prod",
     "cleanup": "node scripts/cleanup.js"
