@@ -32,7 +32,13 @@ export function Providers({
           backButtonEnabled={true}
         >
           <SafeFarcasterSolanaProvider endpoint={solanaEndpoint}>
-            <AuthKitProvider config={{}}>
+            <AuthKitProvider 
+              config={{
+                relay: 'https://relay.farcaster.xyz',
+                rpcUrl: 'https://mainnet.optimism.io',
+                domain: 'castanalytics.vercel.app', // Update this after deployment with your actual domain
+              }}
+            >
               {children}
             </AuthKitProvider>
           </SafeFarcasterSolanaProvider>

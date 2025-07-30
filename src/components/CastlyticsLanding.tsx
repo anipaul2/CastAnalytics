@@ -119,6 +119,8 @@ export default function CastlyticsLanding({
               transition={{ delay: 0.8, duration: 0.6 }}
               className="text-center"
             >
+              {children}
+              </motion.div>
               <Button
                 onClick={onSignIn}
                 className="bg-[#855DCD] hover:bg-[#7248B8] text-white px-12 py-6 text-xl font-semibold rounded-2xl shadow-2xl hover:shadow-purple-500/25 transform hover:scale-105 transition-all duration-300 border-2 border-purple-400/30 hover:border-purple-300/50"
@@ -149,7 +151,6 @@ export default function CastlyticsLanding({
                 </motion.span>
               </Button>
             </motion.div>
-          </motion.div>
         ) : (
           <motion.div
             key="dashboard"
