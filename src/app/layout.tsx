@@ -7,11 +7,11 @@ import { getSession } from "~/auth";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Cast Analytics",
-  description: "Discover your top 5 most engaged Farcaster casts",
+  title: "Castlytics",
+  description: "Discover your most engaged casts and learn what content resonates with your audience",
   openGraph: {
-    title: "Cast Analytics",
-    description: "Discover your top 5 most engaged Farcaster casts",
+    title: "Castlytics",
+    description: "Discover your most engaged casts and learn what content resonates with your audience",
     images: ["https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=1200&h=800&fit=crop&crop=center"],
   },
   other: {
@@ -19,19 +19,19 @@ export const metadata: Metadata = {
       version: "1",
       imageUrl: "https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=1200&h=800&fit=crop&crop=center",
       button: {
-        title: "Cast Analytics",
+        title: "Castlytics",
         action: "post",
       },
-      postUrl: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/share`,
+      postUrl: `${process.env.NEXT_PUBLIC_APP_URL || "https://cast-analytics.vercel.app"}/api/share`,
     }),
     "fc:miniapp": JSON.stringify({
       version: "1",
       imageUrl: "https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=1200&h=800&fit=crop&crop=center",
       button: {
-        title: "Cast Analytics",
+        title: "Castlytics",
         action: "post",
       },
-      postUrl: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/share`,
+      postUrl: `${process.env.NEXT_PUBLIC_APP_URL || "https://cast-analytics.vercel.app"}/api/share`,
     }),
   },
 };
