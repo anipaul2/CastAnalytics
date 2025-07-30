@@ -42,8 +42,8 @@ export default function Home() {
     sdk.actions.ready();
   }, []);
 
-  // Handle successful sign-in
-  const handleSignInSuccess = ({ fid, username }: { fid: number; username: string }) => {
+  // Handle successful sign-in using proper Farcaster auth
+  const handleSignInSuccess = async ({ fid, username }: { fid: number; username: string }) => {
     console.log('Authenticated with FID:', fid);
     
     const mockUser: User = {
@@ -56,13 +56,32 @@ export default function Home() {
     setUser(mockUser);
   };
 
-  // Handle sign-in button click
-  const handleSignIn = () => {
-    // This will be triggered by the CastlyticsLanding component's button
-    // We'll use a mock sign-in for now since the actual button is in CastlyticsLanding
-    const mockFid = 3; // dwr.eth's FID for testing
-    const mockUsername = "dwr.eth";
-    handleSignInSuccess({ fid: mockFid, username: mockUsername });
+  // Handle sign-in using proper Farcaster authentication
+  const handleSignIn = async () => {
+    try {
+      console.log('Starting Farcaster authentication...');
+      
+      // Use the proper Farcaster authentication flow
+      const { token } = await sdk.quickAuth.getToken();
+      console.log('Got Quick Auth token:', token ? 'Present' : 'Missing');
+      
+      if (token) {
+        // Decode the JWT to get user info (in a real app, you'd validate this on your server)
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        console.log('JWT payload:', payload);
+        
+        const fid = payload.sub;
+        const username = `user_${fid}`; // You could fetch the actual username from Neynar API
+        
+        await handleSignInSuccess({ fid, username });
+      } else {
+        console.error('No token received from Quick Auth');
+        setError('Failed to authenticate with Farcaster');
+      }
+    } catch (err) {
+      console.error('Authentication error:', err);
+      setError('Failed to sign in with Farcaster. Please try again.');
+    }
   };
 
   // Handle sign-out

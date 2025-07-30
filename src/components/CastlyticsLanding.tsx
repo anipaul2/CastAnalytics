@@ -1,6 +1,7 @@
 "use client"
 
 import type React from "react"
+import { useState } from "react"
 
 import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "~/components/ui/Button"
@@ -8,7 +9,7 @@ import { Button } from "~/components/ui/Button"
 interface CastlyticsLandingProps {
   isSignedIn: boolean
   username?: string
-  onSignIn: () => void
+  onSignIn: () => Promise<void>
   onSignOut: () => void
   children: React.ReactNode
 }
@@ -20,6 +21,19 @@ export default function CastlyticsLanding({
   onSignOut,
   children,
 }: CastlyticsLandingProps) {
+  const [isSigningIn, setIsSigningIn] = useState(false);
+
+  const handleSignInClick = async () => {
+    setIsSigningIn(true);
+    try {
+      await onSignIn();
+    } catch (error) {
+      console.error('Sign-in error:', error);
+    } finally {
+      setIsSigningIn(false);
+    }
+  };
+
   const features = [
     {
       icon: "📊",
@@ -120,33 +134,57 @@ export default function CastlyticsLanding({
               className="text-center"
             >
               <Button
-                onClick={onSignIn}
+                onClick={handleSignInClick}
                 className="bg-[#855DCD] hover:bg-[#7248B8] text-white px-12 py-6 text-xl font-semibold rounded-2xl shadow-2xl hover:shadow-purple-500/25 transform hover:scale-105 transition-all duration-300 border-2 border-purple-400/30 hover:border-purple-300/50"
+                disabled={isSigningIn}
               >
-                <motion.span whileHover={{ scale: 1.05 }} className="flex items-center gap-4">
+                {isSigningIn ? (
                   <svg
-                    width="24"
-                    height="24"
-                    viewBox="0 0 1000 1000"
-                    fill="none"
+                    className="animate-spin h-6 w-6 text-white"
                     xmlns="http://www.w3.org/2000/svg"
-                    className="flex-shrink-0 text-white"
+                    fill="none"
+                    viewBox="0 0 24 24"
                   >
-                    <path
-                      d="M257.778 155.556H742.222V844.444H671.111V528.889H670.414C662.554 430.106 589.258 353.333 500 353.333C410.742 353.333 337.446 430.106 329.586 528.889H328.889V844.444H257.778V155.556Z"
-                      fill="currentColor"
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
                     />
                     <path
-                      d="M128.889 253.333L157.778 351.111H182.222V746.667C182.222 774.756 177.064 795.111 166.747 807.733C156.431 820.356 143.772 826.667 128.772 826.667H71.1111V920H128.772C168.050 920 199.689 906.489 223.689 879.467C247.689 852.444 259.689 812.756 259.689 760.400V351.111H284.133L313.022 253.333H128.889Z"
+                      className="opacity-75"
                       fill="currentColor"
-                    />
-                    <path
-                      d="M688.889 746.667V351.111H713.333L742.222 253.333H558.089L586.978 351.111H611.422V760.400C611.422 812.756 623.422 852.444 647.422 879.467C671.422 906.489 703.061 920 742.339 920H800V826.667H742.339C727.006 826.667 714.347 820.356 704.031 807.733C693.714 795.111 688.556 774.756 688.556 746.667H688.889Z"
-                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     />
                   </svg>
-                  Sign in with Farcaster
-                </motion.span>
+                ) : (
+                  <motion.span whileHover={{ scale: 1.05 }} className="flex items-center gap-4">
+                    <svg
+                      width="24"
+                      height="24"
+                      viewBox="0 0 1000 1000"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="flex-shrink-0 text-white"
+                    >
+                      <path
+                        d="M257.778 155.556H742.222V844.444H671.111V528.889H670.414C662.554 430.106 589.258 353.333 500 353.333C410.742 353.333 337.446 430.106 329.586 528.889H328.889V844.444H257.778V155.556Z"
+                        fill="currentColor"
+                      />
+                      <path
+                        d="M128.889 253.333L157.778 351.111H182.222V746.667C182.222 774.756 177.064 795.111 166.747 807.733C156.431 820.356 143.772 826.667 128.772 826.667H71.1111V920H128.772C168.050 920 199.689 906.489 223.689 879.467C247.689 852.444 259.689 812.756 259.689 760.400V351.111H284.133L313.022 253.333H128.889Z"
+                        fill="currentColor"
+                      />
+                      <path
+                        d="M688.889 746.667V351.111H713.333L742.222 253.333H558.089L586.978 351.111H611.422V760.400C611.422 812.756 623.422 852.444 647.422 879.467C671.422 906.489 703.061 920 742.339 920H800V826.667H742.339C727.006 826.667 714.347 820.356 704.031 807.733C693.714 795.111 688.556 774.756 688.556 746.667H688.889Z"
+                        fill="currentColor"
+                      />
+                    </svg>
+                    Sign in with Farcaster
+                  </motion.span>
+                )}
               </Button>
             </motion.div>
           </motion.div>
