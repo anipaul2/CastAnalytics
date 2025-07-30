@@ -46,7 +46,7 @@ export default function CastlyticsLanding({
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 relative overflow-hidden">
       {/* Animated background elements */}
-      <div className="absolute inset-0">
+      <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse delay-1000" />
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl animate-pulse delay-500" />
@@ -119,8 +119,6 @@ export default function CastlyticsLanding({
               transition={{ delay: 0.8, duration: 0.6 }}
               className="text-center"
             >
-              {children}
-              </motion.div>
               <Button
                 onClick={onSignIn}
                 className="bg-[#855DCD] hover:bg-[#7248B8] text-white px-12 py-6 text-xl font-semibold rounded-2xl shadow-2xl hover:shadow-purple-500/25 transform hover:scale-105 transition-all duration-300 border-2 border-purple-400/30 hover:border-purple-300/50"
@@ -151,6 +149,7 @@ export default function CastlyticsLanding({
                 </motion.span>
               </Button>
             </motion.div>
+          </motion.div>
         ) : (
           <motion.div
             key="dashboard"

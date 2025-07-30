@@ -36,7 +36,7 @@ export function Providers({
               config={{
                 relay: 'https://relay.farcaster.xyz',
                 rpcUrl: 'https://mainnet.optimism.io',
-                domain: 'castanalytics.vercel.app', // Update this after deployment with your actual domain
+                domain: process.env.NEXT_PUBLIC_APP_URL || 'https://cast-analytics.vercel.app',
               }}
             >
               {children}

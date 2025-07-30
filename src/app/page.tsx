@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import sdk from "@farcaster/miniapp-sdk";
 import TopEngagedCasts from "~/components/TopEngagedCasts";
-import { SignInButton } from '@farcaster/auth-kit';
 import CastlyticsLanding from "~/components/CastlyticsLanding";
 
 interface Cast {
@@ -59,8 +58,11 @@ export default function Home() {
 
   // Handle sign-in button click
   const handleSignIn = () => {
-    // This will be triggered by the CastlyticsLanding component
-    // The actual sign-in logic is handled by the SignInButton component
+    // This will be triggered by the CastlyticsLanding component's button
+    // We'll use a mock sign-in for now since the actual button is in CastlyticsLanding
+    const mockFid = 3; // dwr.eth's FID for testing
+    const mockUsername = "dwr.eth";
+    handleSignInSuccess({ fid: mockFid, username: mockUsername });
   };
 
   // Handle sign-out
@@ -226,17 +228,7 @@ export default function Home() {
       {!user ? (
         // Sign-in prompt
         <div className="text-center">
-          <SignInButton
-            onSuccess={(res) => {
-              if (res.fid) {
-                handleSignInSuccess({ fid: res.fid, username: res.username || `user_${res.fid}` });
-              }
-            }}
-            onError={(error) => {
-              console.error('Sign-in error:', error);
-              setError('Failed to sign in. Please try again.');
-            }}
-          />
+          {/* Removed SignInButton */}
         </div>
       ) : (
         // Show TopEngagedCasts component when user is signed in and casts are loaded
