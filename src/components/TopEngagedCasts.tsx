@@ -241,8 +241,8 @@ export default function TopEngagedCasts({ casts, totalCastsCount = 0, username }
       {/* Casts List */}
       <div className="space-y-6">
         <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Most Engaged Casts</h2>
-          <p className="text-gray-600">Your top performing content ranked by engagement</p>
+          <h2 className="text-3xl font-bold text-white mb-2 drop-shadow-lg">Most Engaged Casts</h2>
+          <p className="text-white/90 font-semibold text-lg">Your top performing content ranked by engagement</p>
         </div>
 
         {casts.map((cast, index) => (
