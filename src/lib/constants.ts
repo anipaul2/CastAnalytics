@@ -88,15 +88,9 @@ export const APP_BUTTON_TEXT = 'Launch Mini App';
 // --- Integration Configuration ---
 /**
  * Webhook URL for receiving events from Neynar.
- *
- * If Neynar API key and client ID are configured, uses the official
- * Neynar webhook endpoint. Otherwise, falls back to a local webhook
- * endpoint for development and testing.
+ * Required for Mini App notifications and user interactions.
  */
-export const APP_WEBHOOK_URL: string =
-  process.env.NEYNAR_API_KEY && process.env.NEYNAR_CLIENT_ID
-    ? `https://api.neynar.com/f/app/${process.env.NEYNAR_CLIENT_ID}/event`
-    : `${APP_URL}/api/webhook`;
+export const APP_WEBHOOK_URL: string = 'https://api.neynar.com/f/app/1b662d30-7f76-433f-9b78-773aafef91b8/event';
 
 /**
  * Flag to enable/disable wallet functionality.
