@@ -40,26 +40,26 @@ export const APP_PRIMARY_CATEGORY = 'social';
  * Tags associated with the mini app.
  * Used for search and discovery in app stores.
  */
-export const APP_TAGS = ['neynar', 'starter-kit', 'demo'];
+export const APP_TAGS = ['analytics', 'engagement', 'social'];
 
 // --- Asset URLs ---
 /**
  * URL for the app's icon image.
  * Used in app store listings and UI elements.
  */
-export const APP_ICON_URL: string = `${APP_URL}/icon.png`;
+export const APP_ICON_URL: string = 'https://i.ibb.co/Y4x0X1nF/AppIcon.png';
 
 /**
  * URL for the app's Open Graph image.
  * Used for social media sharing and previews.
  */
-export const APP_OG_IMAGE_URL: string = `${APP_URL}/api/opengraph-image`;
+export const APP_OG_IMAGE_URL: string = 'https://i.ibb.co/gMSJskPm/SI.png';
 
 /**
  * URL for the app's splash screen image.
  * Displayed during app loading.
  */
-export const APP_SPLASH_URL: string = `${APP_URL}/splash.png`;
+export const APP_SPLASH_URL: string = 'https://i.ibb.co/gMSJskPm/SI.png';
 
 /**
  * Background color for the splash screen.
