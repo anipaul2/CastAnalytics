@@ -34,6 +34,7 @@ interface User {
 export default function Home() {
   const [user, setUser] = useState<User | null>(null);
   const [casts, setCasts] = useState<Cast[]>([]);
+  const [totalCastsCount, setTotalCastsCount] = useState<number>(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isAuthenticating, setIsAuthenticating] = useState(true);
@@ -166,8 +167,15 @@ export default function Home() {
   const handleSignOut = () => {
     setUser(null);
     setCasts([]);
+    setTotalCastsCount(0);
     setError(null);
-    // In a real app, you might want to clear the auth token here
+    setLoading(false);
+    setIsAuthenticating(true);
+    
+    // Force re-authentication by reloading the page
+    setTimeout(() => {
+      window.location.reload();
+    }, 100);
   };
 
   // Fetch user's casts when authenticated
@@ -204,6 +212,12 @@ export default function Home() {
 
         const data = await response.json();
         console.log(`Fetched ${data.casts?.length || 0} casts`);
+        
+        // Track total casts count
+        const totalCasts = data.casts?.length || 0;
+        if (isMounted) {
+          setTotalCastsCount(totalCasts);
+        }
         
         if (!data.casts || data.casts.length === 0) {
           if (isMounted) {
@@ -341,7 +355,7 @@ export default function Home() {
       username={user?.username}
       onSignOut={handleSignOut}
     >
-      <TopEngagedCasts casts={casts} />
+      <TopEngagedCasts casts={casts} totalCastsCount={totalCastsCount} username={user?.username} />
     </CastlyticsLanding>
   );
 }

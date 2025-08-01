@@ -23,6 +23,8 @@ interface Cast {
 
 interface TopEngagedCastsProps {
   casts: Cast[]
+  totalCastsCount?: number
+  username?: string
 }
 
 const getRankIcon = (rank: number) => {
@@ -126,14 +128,70 @@ const cleanCastText = (text: string) => {
   return text.replace(/\s*https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)[^\s]*/gi, '').trim();
 }
 
-export default function TopEngagedCasts({ casts }: TopEngagedCastsProps) {
+export default function TopEngagedCasts({ casts, totalCastsCount = 0, username }: TopEngagedCastsProps) {
   if (!casts || casts.length === 0) {
+    // Different messages based on user's casting activity
+    let emoji = "📊";
+    let title = "No casts found";
+    let message = "Start posting to see your analytics here!";
+
+    if (totalCastsCount === 0) {
+      emoji = "🤔";
+      title = "Mehhh be active more!";
+      message = `Hey @${username || 'anon'}, looks like you haven't cast yet. Time to share your thoughts with the world! 🚀`;
+    } else if (totalCastsCount <= 5) {
+      emoji = "📈";
+      title = "Cast more fren, you can do it!";
+      message = `You've got ${totalCastsCount} cast${totalCastsCount === 1 ? '' : 's'} but need more activity to see analytics. Keep casting and watch your engagement grow! 💪`;
+    } else if (totalCastsCount >= 10) {
+      emoji = "😅";
+      title = "Need more engagement, fren!";
+      message = `You've posted ${totalCastsCount} casts but they're not getting much love. Try engaging with others first, use trending topics, or post when your audience is most active! 🔥`;
+    } else {
+      emoji = "😅";
+      title = "No engagement yet";
+      message = "Your casts need some love! Try posting at peak times or engaging with the community first.";
+    }
+
     return (
       <div className="w-full max-w-4xl mx-auto">
-        <div className="text-center py-12">
-          <div className="text-gray-400 text-6xl mb-4">📊</div>
-          <h3 className="text-xl font-semibold text-gray-700 mb-2">No casts found</h3>
-          <p className="text-gray-500">Start posting to see your analytics here!</p>
+        <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg p-12 border border-purple-100 text-center">
+          <div className="text-6xl mb-6">{emoji}</div>
+          <h3 className="text-2xl font-bold text-gray-800 mb-4">{title}</h3>
+          <p className="text-gray-600 text-lg leading-relaxed max-w-md mx-auto">{message}</p>
+          
+          {totalCastsCount === 0 && (
+            <div className="mt-8">
+              <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl p-6 max-w-sm mx-auto">
+                <div className="text-purple-600 font-semibold mb-2">Pro tip:</div>
+                <div className="text-purple-700 text-sm">
+                  Start with introducing yourself, share your interests, or comment on trending topics!
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {totalCastsCount > 0 && totalCastsCount <= 5 && (
+            <div className="mt-8">
+              <div className="bg-gradient-to-r from-blue-100 to-indigo-100 rounded-xl p-6 max-w-sm mx-auto">
+                <div className="text-blue-600 font-semibold mb-2">Keep going!</div>
+                <div className="text-blue-700 text-sm">
+                  Post regularly, engage with others, and your analytics will start showing up soon.
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {totalCastsCount >= 10 && (
+            <div className="mt-8">
+              <div className="bg-gradient-to-r from-orange-100 to-red-100 rounded-xl p-6 max-w-sm mx-auto">
+                <div className="text-orange-600 font-semibold mb-2">Engagement tips:</div>
+                <div className="text-orange-700 text-sm">
+                  Reply to trending casts, ask questions, share hot takes, and engage authentically with the community!
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     )
@@ -308,7 +366,7 @@ export default function TopEngagedCasts({ casts }: TopEngagedCastsProps) {
                                       src={video.url}
                                       width="100%"
                                       height="100%"
-                                      frameBorder="0"
+                                      style={{ border: 0 }}
                                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                       allowFullScreen
                                       className="w-full h-64 rounded-xl shadow-md"
