@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
+import { getMiniAppEmbedMetadata } from "~/lib/utils";
 
 const inter = Inter({ subsets: ["latin"] });
+const embedMetadata = getMiniAppEmbedMetadata();
 
 export const metadata: Metadata = {
   title: "Castlytics - Your Top Engaged Casts",
@@ -30,11 +32,8 @@ export const metadata: Metadata = {
   },
   other: {
     "farcaster:app": "castlytics",
-    "fc:frame": "vNext",
-    "fc:frame:image": "https://raw.githubusercontent.com/anipaul2/imageUpload/main/SI.png",
-    "fc:frame:button:1": "Launch Mini App",
-    "fc:frame:button:1:action": "launch_frame",
-    "fc:frame:button:1:target": "https://cast-analytics.vercel.app",
+    "fc:miniapp": JSON.stringify(embedMetadata),
+    "fc:frame": JSON.stringify(embedMetadata),
   },
 };
 
