@@ -47,19 +47,19 @@ export const APP_TAGS = ['analytics', 'engagement', 'social'];
  * URL for the app's icon image.
  * Used in app store listings and UI elements.
  */
-export const APP_ICON_URL: string = 'https://i.ibb.co/Y4x0X1nF/AppIcon.png';
+export const APP_ICON_URL: string = 'https://raw.githubusercontent.com/anipaul2/imageUpload/main/AppIcon.png';
 
 /**
  * URL for the app's Open Graph image.
  * Used for social media sharing and previews.
  */
-export const APP_OG_IMAGE_URL: string = 'https://i.ibb.co/gMSJskPm/SI.png';
+export const APP_OG_IMAGE_URL: string = 'https://raw.githubusercontent.com/anipaul2/imageUpload/main/SI.png';
 
 /**
  * URL for the app's splash screen image.
  * Displayed during app loading.
  */
-export const APP_SPLASH_URL: string = 'https://i.ibb.co/gMSJskPm/SI.png';
+export const APP_SPLASH_URL: string = 'https://raw.githubusercontent.com/anipaul2/imageUpload/main/SI.png';
 
 /**
  * Background color for the splash screen.
