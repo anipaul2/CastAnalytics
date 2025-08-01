@@ -28,6 +28,7 @@ export function getMiniAppEmbedMetadata(ogImageUrl?: string) {
       title: APP_BUTTON_TEXT,
       action: {
         type: 'launch_miniapp',
+        name: APP_NAME,
         url: APP_URL,
       },
     },
