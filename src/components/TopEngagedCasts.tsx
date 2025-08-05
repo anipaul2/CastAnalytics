@@ -1,6 +1,8 @@
 "use client"
 
 import { Crown, Medal, Trophy } from "lucide-react";
+import { ShareButton } from "~/components/ui/Share";
+import { APP_URL } from "~/lib/constants";
 
 interface Cast {
   text: string
@@ -226,13 +228,22 @@ export default function TopEngagedCasts({ casts, totalCastsCount = 0, username }
           <div className="flex-1">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">{user?.name}</h1>
             <p className="text-gray-600 mb-4 text-lg">@{user?.username}</p>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 flex-wrap">
               <span className="bg-gradient-to-r from-purple-100 to-pink-100 px-4 py-2 rounded-full text-purple-700 font-medium">
                 Top {casts.length} Casts
               </span>
               <span className="bg-gradient-to-r from-blue-100 to-indigo-100 px-4 py-2 rounded-full text-blue-700 font-medium">
                 {formatNumber(totalEngagement)} Total Engagement
               </span>
+              <ShareButton
+                buttonText="Share on Farcaster"
+                showIcon={true}
+                cast={{
+                  text: `I scored ${formatNumber(totalEngagement)} for my casts, check yours: ${APP_URL}`,
+                  embeds: [APP_URL],
+                }}
+                className="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white px-4 py-2 rounded-full font-medium shadow-lg hover:shadow-xl transition-all duration-300 !w-auto !max-w-none"
+              />
             </div>
           </div>
         </div>

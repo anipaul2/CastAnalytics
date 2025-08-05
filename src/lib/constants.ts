@@ -83,7 +83,7 @@ export const APP_ACCOUNT_ASSOCIATION: AccountAssociation = {
  * Text displayed on the main action button.
  * Used for the primary call-to-action in the mini app.
  */
-export const APP_BUTTON_TEXT = 'Launch Mini App';
+export const APP_BUTTON_TEXT = 'Check your engagement score';
 
 // --- Integration Configuration ---
 /**

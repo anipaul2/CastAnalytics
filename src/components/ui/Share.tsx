@@ -5,6 +5,7 @@ import { Button } from './Button';
 import { useMiniApp } from '@neynar/react';
 import { type ComposeCast } from "@farcaster/miniapp-sdk";
 import { APP_URL } from '~/lib/constants';
+import { Share2 } from 'lucide-react';
 
 interface EmbedConfig {
   path?: string;
@@ -22,9 +23,10 @@ interface ShareButtonProps {
   cast: CastConfig;
   className?: string;
   isLoading?: boolean;
+  showIcon?: boolean;
 }
 
-export function ShareButton({ buttonText, cast, className = '', isLoading = false }: ShareButtonProps) {
+export function ShareButton({ buttonText, cast, className = '', isLoading = false, showIcon = false }: ShareButtonProps) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [bestFriends, setBestFriends] = useState<{ fid: number; username: string; }[] | null>(null);
   const [isLoadingBestFriends, setIsLoadingBestFriends] = useState(false);
@@ -113,6 +115,7 @@ export function ShareButton({ buttonText, cast, className = '', isLoading = fals
       isLoading={isLoading || isProcessing}
       disabled={isLoadingBestFriends}
     >
+      {showIcon && <Share2 className="w-4 h-4 mr-2" />}
       {buttonText}
     </Button>
   );
